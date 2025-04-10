@@ -1,5 +1,6 @@
 from scrapy import Spider, Request
 from urllib.parse import urljoin, quote
+import logging
 
 class SQLiURLCollectorSpider(Spider):
     name = "sqli_url_collector"
@@ -27,6 +28,7 @@ class SQLiURLCollectorSpider(Spider):
     def parse_google_results(self, response):
         # Extraemos los enlaces de los resultados de búsqueda de Google
         links = response.css(".tF2Cxc a::attr(href)").getall()
+        logging.info(f"Se encontraron {len(links)} enlaces en la página de Google")  # Agregamos este log
         for link in links:
             # Verificamos si el enlace es absoluto
             if link.startswith("http"):
