@@ -1,12 +1,10 @@
-from scrapy import Spider
-from urllib.parse import urljoin
-
+from scrapy import Spider, Request
+from urllib.parse import urljoin, quote
 
 class SQLiURLCollectorSpider(Spider):
     name = "sqli_url_collector"
-    start_urls = [
-        "https://www.disneyplus.com/identity/login"
-    ]
+    # Ahora no necesitamos start_urls
+    # start_urls = ["https://www.disneyplus.com/identity/login"]
 
     # Palabras clave para filtrar URLs
     keywords = [
@@ -22,16 +20,20 @@ class SQLiURLCollectorSpider(Spider):
         "login", "AND intext:remember me"
     ]
 
-    def parse(self, response):
-        # Extraer todos los enlaces de la página
-        links = response.css("a::attr(href)").getall()
-        for link in links:
-            absolute_url = urljoin(response.url, link)
-            # Filtrar URLs que contengan alguna de las palabras clave
-            if any(keyword in absolute_url for keyword in self.keywords):
-                yield {"url": absolute_url}
+    def start_requests(self):
+        # Usamos Google para buscar URLs que contengan nuestras palabras clave
+        for keyword in self.keywords:
+            google_search_url = f"https://www.google.com/search?q={quote(keyword)}"
+            yield Request(google_search_url, callback=self.parse_google_results)
 
-        # Seguir a la siguiente página si existe
-        next_page = response.css(".next a::attr(href)").get()
-        if next_page:
-            yield response.follow(next_page, callback=self.parse)
+    def parse_google_results(self, response):
+        # Extraemos los enlaces de los resultados de búsqueda de Google
+        links = response.css(".tF2Cxc a::attr(href)").getall()
+        for link in links:
+            # Verificamos si el enlace es absoluto
+            if link.startswith("http"):
+                yield {"url": link}
+
+    def parse(self, response):
+        # Este método ya no es necesario, ya que estamos extrayendo los enlaces directamente de Google
+        pass
