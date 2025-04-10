@@ -3,8 +3,6 @@ from urllib.parse import urljoin, quote
 
 class SQLiURLCollectorSpider(Spider):
     name = "sqli_url_collector"
-    # Ahora no necesitamos start_urls
-    # start_urls = ["https://www.disneyplus.com/identity/login"]
 
     # Palabras clave para filtrar URLs
     keywords = [
@@ -33,7 +31,3 @@ class SQLiURLCollectorSpider(Spider):
             # Verificamos si el enlace es absoluto
             if link.startswith("http"):
                 yield {"url": link}
-
-    def parse(self, response):
-        # Este método ya no es necesario, ya que estamos extrayendo los enlaces directamente de Google
-        pass
